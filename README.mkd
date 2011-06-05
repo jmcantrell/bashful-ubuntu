@@ -1,0 +1,8 @@
+An extension for bashful with some stuff specific to Ubuntu.
+
+Installation
+------------
+
+You will need to install the core bashful libraries:
+
+* [bashful](http://github.com/jmcantrell/bashful)
