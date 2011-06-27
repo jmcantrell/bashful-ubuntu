@@ -3,7 +3,7 @@
 # Filename:      bashful-zenity
 # Description:   User interaction with a preference for zenity
 # Maintainer:    Jeremy Cantrell <jmcantrell@gmail.com>
-# Last Modified: Sat 2011-06-04 16:44:04 (-0400)
+# Last Modified: Sun 2011-06-26 17:20:12 (-0400)
 
 if (( ${BASH_LINENO:-0} == 0 )); then
     source bashful-doc
@@ -17,25 +17,6 @@ source bashful-input
 
 input_zenity() #{{{1
 {
-    # doc input {{{
-    #
-    # Prompts the user to input text.
-    #
-    # Usage: input [-cs] [-p PROMPT] [-d DEFAULT]
-    #
-    # Usage examples:
-    #
-    # If user presses enter with no response, foo is taken as the input:
-    #     input -p "Enter value" -d foo
-    #
-    # User will only be prompted if interactive mode is enabled:
-    #     input -c -p "Enter value"
-    #
-    # Input will be hidden:
-    #     input -s -p "Enter password"
-    #
-    # doc-end input }}}
-
     if [[ ! $DISPLAY ]]; then
         input "$@" || return 1
         return 0
@@ -69,24 +50,6 @@ input_zenity() #{{{1
 
 question_zenity() #{{{1
 {
-    # doc question {{{
-    #
-    # Prompts the user with a yes/no question.
-    # The default value can be anything that evaluates to true/false.
-    # See documentation for the "truth" command for more info.
-    #
-    # Usage: question [-c] [-p PROMPT] [-d DEFAULT]
-    #
-    # Usage examples:
-    #
-    # If user presses enter with no response, answer will be "yes":
-    #     question -p "Continue?" -d1
-    #
-    # User will only be prompted if interactive mode is enabled:
-    #     question -c -p "Continue?"
-    #
-    # doc-end question }}}
-
     if [[ ! $DISPLAY ]]; then
         question "$@" || return 1
         return 0
@@ -112,6 +75,34 @@ question_zenity() #{{{1
     p=${p//$HOME/~}
 
     zenity --question --text="$p"
+}
+
+choice_zenity() #{{{1
+{
+    local p="Select from these choices"
+    local c
+
+    unset OPTIND
+    while getopts ":p:c" option; do
+        case $option in
+            p) p=$OPTARG ;;
+            c) c=1 ;;
+        esac
+    done && shift $(($OPTIND - 1))
+
+    if truth $c && ! interactive; then
+        return
+    fi
+
+    if (( $# <= 1 )); then
+        echo "$1"
+        exit
+    fi
+
+    # Shorten home paths, if they exist.
+    p=${p//$HOME/~}
+
+    zenity --list --title="$p" --text="$p:" --hide-header --column=choice "$@"
 }
 
 
